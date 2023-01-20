@@ -1,0 +1,21 @@
+V-n diagram summary
+-------------------
+Aircraft: Sling_2
+category: normal
+FAR certification: Part 23
+Weight = 1543 lb
+Altitude = 0 ft
+---------------------------------------------------------------
+
+Airspeeds: 
+    Positive stall speed (Vs1)   = 74.5 KEAS
+    Negative stall speed (Vs1)   = 84.9 KEAS
+    Positive maneuver speed (Va) = 145.2 KEAS
+    Negative maneuver speed (Va) = 104.7 KEAS
+    Cruise speed (Vc)            = 167.0 KEAS
+    Dive speed (Vd)              = 192.0 KEAS
+Load factors: 
+    Positive limit load factor (n+) = 6.98
+    Negative limit load factor (n-) = -4.44
+    Positive load factor at Vd      = 3.92
+    Negative load factor at Vd      = -1.92

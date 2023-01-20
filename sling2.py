@@ -17,7 +17,7 @@ from SUAVE.Core import Units
 from SUAVE.Methods.Propulsion import propeller_design
 from SUAVE.Methods.Geometry.Two_Dimensional.Planform import segment_properties
 from SUAVE.Plots.Performance import *
-from SUAVE.Methods.Performance  import payload_range
+from SUAVE.Methods.Performance  import payload_range, V_n_diagram
 
 from SUAVE.Input_Output.OpenVSP import write
 
@@ -29,19 +29,41 @@ def main():
     
     vehicle    = vehicle_setup()
     
- #   write(vehicle,'Sling_2')
+#    write(vehicle,'Sling_2')
     
-#    analyses = base_analysis(vehicle)
-#   analyses.finalize()
-#    mission  = mission_setup(analyses,vehicle)
+    configs = configs_setup(vehicle)
+    
+    analyses = base_analysis(vehicle)
+    
+    configs.finalize()
+    analyses.finalize()
+    
+   
+    
+   
+    mission  = mission_setup(analyses,vehicle)
     
     
-#    results = mission.evaluate()
+    results = mission.evaluate()
     
+    # run payload diagram
+    config = configs.base
+    cruise_segment_tag = "cruise"
+    reserves = 0.
+    payload_range_results = payload_range(config,mission,cruise_segment_tag,reserves)
     
-#    plot_mission(results)
+    plot_mission(results)
+    
+#    weights = analyses.configs.base.weights
+#    breakdown = weights.evaluate()  
     
     loads(vehicle)
+    
+    altitude = 0 * Units.m
+    delta_ISA = 20 * Units.degC
+    weight = vehicle.mass_properties.max_takeoff
+    V_n_diagram(vehicle,analyses,weight, altitude, delta_ISA)
+    print("Complete")
 
 def vehicle_setup(): 
       
@@ -54,13 +76,25 @@ def vehicle_setup():
 
     vehicle.mass_properties.max_takeoff         = 700. * Units.kg
     vehicle.mass_properties.takeoff             = 700. * Units.kg
-    vehicle.mass_properties.max_zero_fuel       = 2555. * Units.pounds    
+    vehicle.mass_properties.operating_empty     = 460. * Units.kg #including pilot
+    vehicle.mass_properties.max_zero_fuel       = 600. * Units.kg    
     
     vehicle.envelope.ultimate_load              = 5.7
     vehicle.envelope.limit_load                 = 3.8
     
+    vehicle.envelope.limit_loads.positive       = 3.5
+    vehicle.envelope.limit_loads.negative       = -1.4
+    
+    
     vehicle.reference_area                      = 11.845 * Units.m**2       
     vehicle.passengers                          = 2
+    
+    vehicle.envelope.FAR_part_number            = 23
+    vehicle.envelope.category                   = 'normal'
+    vehicle.envelope.cruise_mach                = 0.09
+    
+    vehicle.maximum_lift_coefficient            = 1.3 #assumed
+    vehicle.minimum_lift_coefficient            = -1 #assumed
 
     # ------------------------------------------------------------------        
     #   Main Wing
@@ -495,30 +529,33 @@ def plot_mission(results,line_style='bo-'):
 
     return
 
-def loads(vehicle):
-    
-     designbrief = {}
-     
-     print(vehicle.wings.main_wing.areas.reference)
-    
-     designdef = {'aspectratio': vehicle.wings.main_wing.aspect_ratio, 'wingarea_m2': vehicle.wings.main_wing.areas.reference, 'weight_n':  vehicle.mass_properties.max_takeoff}
-    
-    # designperf = {'CLmaxclean': 1.45, 'CLminclean': -1, 'CLslope': 6.28}
-    
-    # designpropulsion = "piston" # not specifically needed for the V-n diagram here, required simply for 
-    #                             # consistency with other classes and to support features included in later releases 
-    
-    # designatm = at.Atmosphere() # set the design atmosphere to a zero-offset ISA
-    
-    # csbrief={'cruisespeed_keas': 107, 'divespeed_keas': 150,
-    # 'altitude_m': 0,
-    # 'weightfraction': 1, 'certcat': 'norm'}
-    
-    # concept = aw.CertificationSpecifications(designbrief, designdef, designperf, designatm, designpropulsion, csbrief)
-    
-    # points = concept.flightenvelope(textsize=15, figsize_in=[15, 10], show=True)
-        
 
+
+
+def loads(vehicle):
+        
+    designbrief = {}
+     
+    print(vehicle.wings.main_wing.areas.reference)
+    
+    designdef = {'aspectratio': vehicle.wings.main_wing.aspect_ratio, 'wingarea_m2': vehicle.wings.main_wing.areas.reference, 'weight_n':  vehicle.mass_properties.max_takeoff}
+    
+    designperf = {'CLmaxclean': vehicle.maximum_lift_coefficient , 'CLminclean': vehicle.minimum_lift_coefficient, 'CLslope': 6.28}
+    
+    designpropulsion = "piston" # not specifically needed for the V-n diagram here, required simply for 
+                                # consistency with other classes and to support features included in later releases 
+    
+    designatm = at.Atmosphere() # set the design atmosphere to a zero-offset ISA
+    
+    csbrief={'cruisespeed_keas': 60, 'divespeed_keas': 110,
+    'altitude_m': 0,
+    'weightfraction': 1, 'certcat': 'norm'}
+    
+    concept = aw.CertificationSpecifications(designbrief, designdef, designperf, designatm, designpropulsion, csbrief)
+    
+    points = concept.flightenvelope(textsize=15, figsize_in=[15, 10], show=True)
+        
+    return
 
 if __name__ == '__main__':
     main()
