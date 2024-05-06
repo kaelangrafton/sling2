@@ -345,10 +345,10 @@ def vehicle_setup():
 
     prop.airfoil_geometry        =  ['./Airfoils/NACA_4412.txt'] 
     prop.airfoil_polars          = [['./Airfoils/Polars/NACA_4412_polar_Re_50000.txt' ,
-                                     './Airfoils/Polars/NACA_4412_polar_Re_100000.txt' ,
-                                     './Airfoils/Polars/NACA_4412_polar_Re_200000.txt' ,
-                                     './Airfoils/Polars/NACA_4412_polar_Re_500000.txt' ,
-                                     './Airfoils/Polars/NACA_4412_polar_Re_1000000.txt' ]]
+                                      './Airfoils/Polars/NACA_4412_polar_Re_100000.txt' ,
+                                      './Airfoils/Polars/NACA_4412_polar_Re_200000.txt' ,
+                                      './Airfoils/Polars/NACA_4412_polar_Re_500000.txt' ,
+                                      './Airfoils/Polars/NACA_4412_polar_Re_1000000.txt' ]]
 
     prop.airfoil_polar_stations  = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]      
     prop                         = propeller_design(prop)   
